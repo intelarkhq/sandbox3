@@ -46,7 +46,7 @@ async function auth() {
           body: JSON.stringify({
               authCode: authCode,
               command: {
-                command: "auth",
+                commandName: "auth",
               }
           })
       });
@@ -116,7 +116,7 @@ async function processCommand(command, args) {
               authCode: authCode,
               accountId: accountId,
               command: {
-                command: command,
+                commandName: command,
                 args: args
               }
           })
