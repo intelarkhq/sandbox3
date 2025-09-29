@@ -23,14 +23,14 @@ let username = localStorage.getItem('username');
 const API_URL = "https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec";
 
 if ((!accountId) || (accountId == null)) {
-  window.location.href = login.html
+  window.location.href = "login.html"
 } else {
   let response = processCommand("preauth")
   if (response.error) {
     if ((!username) || (username == null)) {
-      window.location.href = login.html
+      window.location.href = "login.html"
     } else {
-      window.location.href = reauth.html
+      window.location.href = "reauth.html"
     }
   }
 }
