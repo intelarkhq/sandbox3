@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IntelArk | ReAuth</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition lockscreen">
+<script>     
+  async function primary() {      
+    var code = window.location.href.split("?code=")[1]
+    if (code == undefined) {
+      window.close()
+    } else {
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec?code=${code}`);
+        const data = await res.json()
+        console.log(data)
+        window.opener.postMessage(JSON.stringify(data), window.location.origin)
+        window.close()
+    }
+  }
+</script>
+<!-- Automatic element centering -->
+<div class="lockscreen-wrapper">
+  <div class="lockscreen-logo">
+    <h1><b>Intel</b>Ark</h1>
+  </div>
+  <!-- User name -->
+  <div class="lockscreen-name">ROBLOX Verification</div>
+
+  <div class="help-block text-center">
+    <br><br>Loading...
+  </div>
+</div>
+<!-- /.center -->
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
