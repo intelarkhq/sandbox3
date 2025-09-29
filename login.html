@@ -23,16 +23,20 @@ let username = localStorage.getItem('username');
 const API_URL = "https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec";
 
 if ((!accountId) || (accountId == null)) {
-  window.location.href = "login.html"
+  //window.location.href = "login.html"
 } else {
-  let response = processCommand("preauth")
-  if (response.error) {
-    if ((!username) || (username == null)) {
-      window.location.href = "login.html"
+  let response = processCommand("preauth").then((response) => {
+    console.log(response)
+    if (response.error) {
+      if ((!username) || (username == null)) {
+        //window.location.href = "login.html"
+      } else {
+        window.location.href = "reauth.html"
+      }
     } else {
-      window.location.href = "reauth.html"
+      window.location.href = "index.html"
     }
-  }
+  });
 }
 
 async function auth() {
@@ -153,7 +157,7 @@ function linkify(text) {
     <div class="card-body" id="card-body">
       <p class="login-box-msg">Sign in with ROBLOX to continue.</p>
 
-      <p>In order to use the service, you must agree with the following documents:</p>
+      <p>In order to use the service, you must agree to our terms and policies:</p>
       <ul>
         <li><a href="terms-of-service.html">Terms of Service</a></li>
         <li><a href="privacy-policy.html" class="text-center">Privacy Policy</a></li>

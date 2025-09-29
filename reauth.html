@@ -13,47 +13,168 @@
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
 </head>
 <body class="hold-transition lockscreen">
+<script>
+let authCode = localStorage.getItem('authCode');
+let accountId = localStorage.getItem('accountId');
+let username = localStorage.getItem('username');
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec";
+
+if ((!accountId) || (accountId == null)) {
+  window.location.href = "login.html"
+} else {
+  let response = processCommand("preauth").then((response) => {
+    console.log(response)
+    if (response.error) {
+      if ((!username) || (username == null)) {
+        window.location.href = "login.html"
+      } else {
+        //window.location.href = "reauth.html"
+      }
+    } else {
+      window.location.href = "index.html"
+    }
+  });
+}
+
+window.onload = function() {
+  if (username) {
+    document.getElementById("username-field").textContent = username
+  }
+}
+
+async function auth() {
+  authCode = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
+  localStorage.setItem("authCode", authCode)
+  document.getElementById("signinbtn").disabled = true
+  try {
+      const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+              authCode: authCode,
+              command: {
+                commandName: "auth",
+              }
+          })
+      });
+      const data = await res.json()
+      console.log(data)
+      if (!data.error) {
+        openAuth(data.response)
+      } else {
+        throw new Error("Server error. Please try again later.")
+      }
+  } catch (err) {
+    let div = document.createElement("div")
+    div.textContent = err.message
+    document.getElementById("footer-text").appendChild(div) 
+    document.getElementById("signinbtn").disabled = false
+  }
+}
+function openAuth(nonce) {
+  console.log(nonce)
+  
+  const oauthLink = `https://apis.roblox.com/oauth/v1/authorize?client_id=1177318814559888844&redirect_uri=${encodeURIComponent("https://intelarkhq.github.io/sandbox3/redirect.html")}&scope=openid&response_type=code&nonce=${encodeURIComponent(nonce)}`
+  
+  let div = document.createElement("div")
+  div.textContent = "Please continue in the ROBLOX verification window."
+  document.getElementById("footer-text").appendChild(div) 
+
+  newWindow = window.open(oauthLink, "_blank", "width=600,height=700")
+  if (newWindow) {
+    newWindow.focus();
+    window.addEventListener('message', function(event) {
+      if (event.origin !== window.location.origin) return;
+      console.log(event.origin)
+
+      console.log('OAuth complete:', event.data);
+      newWindow.close();
+
+      let authData = JSON.parse(event.data)
+      console.log(authData)
+      console.log(authData.success)
+      if (authData.success) {
+        localStorage.setItem('accountId', authData.accountId)
+        accountId = authData.accountId
+        localStorage.setItem('username', authData.username)
+        username = authData.username
+        window.location.href = "index.html"
+      } else {
+        let div = document.createElement("div")
+        div.textContent = `Invalid or expired request. Please try again. If this issue persists, contact Vasek_Stolba.`
+        document.getElementById("footer-text").appendChild(div) 
+        document.getElementById("signinbtn").disabled = false
+      }
+    });
+    } else {
+        let div = document.createElement("div")
+        div.textContent = `Popup blocked! Please allow popups for this site.`
+        document.getElementById("footer-text").appendChild(div) 
+        document.getElementById("signinbtn").disabled = false
+    }
+    document.getElementById("signinbtn").disabled = true
+}
+
+async function processCommand(command, args) {
+  try {
+      const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+              authCode: authCode,
+              accountId: accountId,
+              command: {
+                commandName: command,
+                args: args
+              }
+          })
+      });
+      const data = await res.json()
+      return data
+  } catch (err) {
+    console.log(err)
+    return {
+      error: err
+    }
+  }
+}
+
+function linkify(text) {
+    // Regex to detect URLs (http, https, www)
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+    return text.replace(urlRegex, (url) => {
+        let href = url;
+        if (!href.startsWith('http')) {
+            href = 'http://' + href; // Support bare www. links
+        }
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+}
+
+</script>
 <!-- Automatic element centering -->
 <div class="lockscreen-wrapper">
   <div class="lockscreen-logo">
-    <a href="index2.html"><b>Admin</b>LTE</a>
+    <h1><b>Intel</b>Ark</h1>
   </div>
   <!-- User name -->
-  <div class="lockscreen-name">John Doe</div>
+  <p class="help-block text-center">Welcome back, <span class="lockscreen-name" id="username-field"></span></p>
+  
 
   <!-- START LOCK SCREEN ITEM -->
   <div class="lockscreen-item">
-    <!-- lockscreen image -->
-    <div class="lockscreen-image">
-      <img src="dist/img/user1-128x128.jpg" alt="User Image">
+    <div class="social-auth-links text-center mt-2 mb-3">
+      <button type="button" id="signinbtn" onclick="auth()" class="btn btn-block btn-dark text-center">
+        <img class="mr-2" src="dist/img/roblox.svg" height="16px" width="16px"> Sign in using ROBLOX
+      </button>
     </div>
-    <!-- /.lockscreen-image -->
-
-    <!-- lockscreen credentials (contains the form) -->
-    <form class="lockscreen-credentials">
-      <div class="input-group">
-        <input type="password" class="form-control" placeholder="password">
-
-        <div class="input-group-append">
-          <button type="button" class="btn">
-            <i class="fas fa-arrow-right text-muted"></i>
-          </button>
-        </div>
-      </div>
-    </form>
-    <!-- /.lockscreen credentials -->
-
   </div>
   <!-- /.lockscreen-item -->
-  <div class="help-block text-center">
-    Enter your password to retrieve your session
-  </div>
-  <div class="text-center">
-    <a href="login.html">Or sign in as a different user</a>
-  </div>
-  <div class="lockscreen-footer text-center">
-    Copyright &copy; 2014-2021 <b><a href="https://adminlte.io" class="text-black">AdminLTE.io</a></b><br>
-    All rights reserved
+  <div class="help-block text-left" id="footer-text">
+    Your session has expired. Please sign in again to continue.<br><br>By using the service, you agree to our terms and policies:
+    <ul>
+      <li><a href="terms-of-service.html">Terms of Service</a></li>
+      <li><a href="privacy-policy.html" class="text-center">Privacy Policy</a></li>
+    </ul>
   </div>
 </div>
 <!-- /.center -->
