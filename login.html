@@ -35,6 +35,8 @@ if ((!accountId) || (accountId == null)) {
       }
     } else {
       window.location.href = "index.html"
+      localStorage.setItem('username', response.response.username)
+      username = response.response.username
     }
   });
 }
