@@ -23,7 +23,7 @@
         const data = await res.json()
         console.log(data)
         window.opener.postMessage(JSON.stringify(data), window.location.origin)
-        window.close()
+        //window.close()
     }
   }
 </script>

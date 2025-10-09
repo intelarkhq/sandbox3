@@ -7,148 +7,16 @@
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <!-- Summernote -->
+  <link rel="stylesheet" href="plugins/summernote/summernote-bs4.min.css">
+  <!-- pace-progress -->
+  <link rel='stylesheet' href='plugins/nprogress/nprogress.css'/>
 </head>
-<body class="hold-transition login-page">
-<script>
-let authCode = localStorage.getItem('authCode');
-let accountId = localStorage.getItem('accountId');
-let username = localStorage.getItem('username');
-
-const API_URL = "https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec";
-
-if ((!accountId) || (accountId == null)) {
-  //window.location.href = "login.html"
-} else {
-  let response = processCommand("preauth").then((response) => {
-    console.log(response)
-    if (response.error) {
-      if ((!username) || (username == null)) {
-        //window.location.href = "login.html"
-      } else {
-        window.location.href = "reauth.html"
-      }
-    } else {
-      window.location.href = "index.html"
-      localStorage.setItem('username', response.response.username)
-      username = response.response.username
-    }
-  });
-}
-
-async function auth() {
-  document.getElementById("agree").disabled = true
-  authCode = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
-  localStorage.setItem("authCode", authCode)
-  document.getElementById("signinbtn").disabled = true
-  try {
-      const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-              authCode: authCode,
-              command: {
-                commandName: "auth",
-              }
-          })
-      });
-      const data = await res.json()
-      console.log(data)
-      if (!data.error) {
-        openAuth(data.response)
-      } else {
-        throw new Error("Server error. Please try again later.")
-      }
-  } catch (err) {
-    let div = document.createElement("div")
-    div.textContent = err.message
-    document.getElementById("card-body").appendChild(div) 
-    document.getElementById("signinbtn").disabled = false
-  }
-}
-function openAuth(nonce) {
-  console.log(nonce)
-  
-  const oauthLink = `https://apis.roblox.com/oauth/v1/authorize?client_id=1177318814559888844&redirect_uri=${encodeURIComponent("https://intelarkhq.github.io/sandbox3/redirect.html")}&scope=openid&response_type=code&nonce=${encodeURIComponent(nonce)}`
-  
-  let div = document.createElement("div")
-  div.textContent = "Please continue in the ROBLOX verification window."
-  document.getElementById("card-body").appendChild(div) 
-
-  newWindow = window.open(oauthLink, "_blank", "width=600,height=700")
-  if (newWindow) {
-    newWindow.focus();
-    window.addEventListener('message', function(event) {
-      if (event.origin !== window.location.origin) return;
-      console.log(event.origin)
-
-      console.log('OAuth complete:', event.data);
-      newWindow.close();
-
-      let authData = JSON.parse(event.data)
-      console.log(authData.success)
-      if (authData.success) {
-        localStorage.setItem('accountId', authData.accountId)
-        accountId = authData.accountId
-        localStorage.setItem('username', authData.username)
-        username = authData.username
-        window.location.href = index.html
-      } else {
-        let div = document.createElement("div")
-        div.textContent = authData.message
-        document.getElementById("card-body").appendChild(div) 
-        document.getElementById("signinbtn").disabled = false
-      }
-    });
-    } else {
-        let div = document.createElement("div")
-        div.textContent = `Popup blocked! Please allow popups for this site.`
-        document.getElementById("card-body").appendChild(div) 
-        document.getElementById("signinbtn").disabled = false
-    }
-    document.getElementById("signinbtn").disabled = true
-}
-
-async function processCommand(command, args) {
-  try {
-      const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-              authCode: authCode,
-              accountId: accountId,
-              command: {
-                commandName: command,
-                args: args
-              }
-          })
-      });
-      const data = await res.json()
-      return data
-  } catch (err) {
-    console.log(err)
-    return {
-      error: err
-    }
-  }
-}
-
-function linkify(text) {
-    // Regex to detect URLs (http, https, www)
-    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
-    return text.replace(urlRegex, (url) => {
-        let href = url;
-        if (!href.startsWith('http')) {
-            href = 'http://' + href; // Support bare www. links
-        }
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-    });
-}
-
-</script>
+<body class="hold-transition login-page" onload="primary()">
 <div class="login-box">
   <!-- /.login-logo -->
   <div class="card card-outline card-primary">
@@ -178,7 +46,7 @@ function linkify(text) {
 
       <div class="social-auth-links text-center mt-2 mb-3">
         <button type="button" id="signinbtn" onclick="auth()" class="btn btn-block btn-dark" disabled>
-          <img class="mr-2" src="dist/img/roblox.svg" height="16px" width="16px"> Sign in using ROBLOX
+          <img class="mr-2" style="margin-bottom: 3px" src="dist/img/roblox.svg" height="20px" width="20px"> Sign in using ROBLOX
         </button>
       </div>
       <!-- /.social-auth-links -->
@@ -189,11 +57,27 @@ function linkify(text) {
 </div>
 <!-- /.login-box -->
 
+<!-- REQUIRED SCRIPTS -->
+
 <!-- jQuery -->
 <script src="plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
+<!-- Summernote -->
+<script src="plugins/summernote/summernote-bs4.min.js"></script>
+<!-- DOMPurify -->
+<script src='plugins/DOMPurify/purify.min.js'></script>
+<!-- pace-progress -->
+<script src='plugins/nprogress/nprogress.js'></script>
+<!-- main -->
+<script src="plugins/defaultScripts/scripts.js"></script>
+<script>
+  $(function () {
+    // Summernote
+    $('#summernote').summernote()
+  })
+</script>
 </body>
 </html>

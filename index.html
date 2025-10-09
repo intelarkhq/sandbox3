@@ -7,7 +7,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LCPD</title>
+  <title>LCPD: Dashboard</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -15,91 +15,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
-
+  <!-- Summernote -->
   <link rel="stylesheet" href="plugins/summernote/summernote-bs4.min.css">
+  <!-- pace-progress -->
+  <link rel='stylesheet' href='plugins/nprogress/nprogress.css'/>
 </head>
 <body class="hold-transition sidebar-mini" onload="primary()">
-<script>
-let authCode = localStorage.getItem('authCode');
-let accountId = localStorage.getItem('accountId');
-let username = localStorage.getItem('username');
-
-const API_URL = "https://script.google.com/macros/s/AKfycbwI6iIBquFTJuORBgDSdC_gL2C5bEEhzPllK45bPWd88a1WUoofQ9AO0GH5Dsxy4ROV/exec";
-
-function primary() {
-  if (!accountId) {
-    window.location.href = "login.html"
-  } else {
-    
-    let placeholderElements = []
-    let requiredValues = []
-    Array.from(document.getElementsByClassName("placeholder")).forEach((element, i) => {
-      element.textContent = "Loading..."
-      placeholderElements.push({element: element, valueName: element.dataset.placeholdervalue})
-      requiredValues.push(element.dataset.placeholdervalue)
-    })
-    console.log(JSON.stringify(requiredValues))
-
-    processCommand("preauth", JSON.stringify(requiredValues)).then((response) => {
-      console.log(response)
-      if (response.error) {
-        if ((!username)) {
-          window.location.href = "login.html"
-        } else {
-          window.location.href = "reauth.html"
-        }
-      } else {
-        localStorage.setItem('returnedData', JSON.stringify(response.response))
-        
-        placeholderElements.forEach(el => {
-          let value = response.response[el.valueName]
-          if (value) {
-            el.element.textContent = value
-          } else {
-            el.element.textContent = "N/A"
-          }
-        })
-        //window.location.href = "index.html"
-      }
-    })
-  }
-}
-
-async function processCommand(command, args) {
-  try {
-      const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-              authCode: authCode,
-              accountId: accountId,
-              command: {
-                commandName: command,
-                args: args
-              }
-          })
-      });
-      const data = await res.json()
-      return data
-  } catch (err) {
-    console.log(err)
-    return {
-      error: err
-    }
-  }
-}
-
-function linkify(text) {
-    // Regex to detect URLs (http, https, www)
-    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
-    return text.replace(urlRegex, (url) => {
-        let href = url;
-        if (!href.startsWith('http')) {
-            href = 'http://' + href; // Support bare www. links
-        }
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-    });
-}
-</script>
 <div class="wrapper">
 
   <!-- Navbar -->
@@ -110,10 +31,10 @@ function linkify(text) {
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="index3.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Dashboard</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Contact</a>
+        <a href="lookup.html" class="nav-link">Look-Up</a>
       </li>
     </ul>
 
@@ -140,31 +61,22 @@ function linkify(text) {
           </form>
         </div>
       </li>
-      <!-- Notifications Dropdown Menu -->
       <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
+        <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
           <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
+          <span id="notif-dropdown-count" class="badge badge-danger navbar-badge"></span>
         </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
+        <div id="notif-dropdown-list" class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px;">
           <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
+            <!-- Message Start -->
+            <div class="media">
+              <div class="media-body">
+                <p class="text-sm text-center">No new notifications.</p>
+              </div>
+            </div>
+            <!-- Message End -->
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
         </div>
       </li>
       <li class="nav-item">
@@ -184,9 +96,9 @@ function linkify(text) {
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
+    <a href="index.html" class="brand-link">
       <img src="dist/img/lcpd.png" alt="x" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">LCPD</span>
+      <span class="brand-text font-weight-light">LCPD: Intel<b>Ark</b></span>
     </a>
 
     <!-- Sidebar -->
@@ -194,7 +106,7 @@ function linkify(text) {
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="info">
-          <a href="#" class="d-block placeholder" data-placeholdervalue="username">Alexander Pierce</a>
+          <a href="#" class="d-block">[username]</a>
         </div>
       </div>
 
@@ -215,9 +127,15 @@ function linkify(text) {
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-item menu-open">
+          <li class="nav-item">
             <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <i class="fas fa-house-user nav-icon"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item" id="iaNav" style="display: none;">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-balance-scale-right"></i>
               <p>
                 Internal Affairs
                 <i class="right fas fa-angle-left"></i>
@@ -225,22 +143,22 @@ function linkify(text) {
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link active">
-                  <i class="far fa-circle nav-icon"></i>
+                <a href="#" class="nav-link">
+                  <i class="far fa-file-alt nav-icon"></i>
                   <p>Case Management</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="far fa-folder-open nav-icon"></i>
                   <p>Archive</p>
                 </a>
               </li>
             </ul>
           </li>
-          <li class="nav-item menu-open">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
+          <li class="nav-item" id="sisNav" style="display: none;">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-user-secret"></i>
               <p>
                 SIS
                 <i class="right fas fa-angle-left"></i>
@@ -248,7 +166,7 @@ function linkify(text) {
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link active">
+                <a href="#" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Case Management</p>
                 </a>
@@ -275,12 +193,11 @@ function linkify(text) {
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0">Internal Affairs Archive</h1>
+            <h1 class="m-0">Dashboard</b></h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Starter Page</li>
+              <li class="breadcrumb-item active">Dashboard</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -292,226 +209,378 @@ function linkify(text) {
     <div class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Responsive Hover Table</h3>
+          <div class="col-md-3">
 
-                <div class="card-tools">
-                  <div class="input-group input-group-sm" style="width: 150px;">
-                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
-
-                    <div class="input-group-append">
-                      <button type="submit" class="btn btn-default">
-                        <i class="fas fa-search"></i>
-                      </button>
-                    </div>
-                  </div>
+            <!-- Profile Image -->
+            <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <img class="profile-user-img img-fluid img-circle" data-placeholder="src" data-placeholderkey="userHeadshot" alt="User profile picture">
                 </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>User</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Reason</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>183</td>
-                      <td>John Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-success">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>219</td>
-                      <td>Alexander Pierce</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-warning">Pending</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>657</td>
-                      <td>Bob Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-primary">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>175</td>
-                      <td>Mike Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-danger">Denied</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                  </tbody>
-                </table>
+
+                <h3 class="profile-username text-center">[username]</h3>
+
+                <p class="text-muted text-center placeholder">[userRank]</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <a data-toggle="collapse" href="#collapseLCPD" class="w-100" aria-expanded="false"><b>LCPD</b> <i class="float-right fas placeholder" data-placeholderkey="permissionsLcpd0" data-placeholder="class" style="font-size: 25px;"></i></a>
+                    <div class="collapse" id="collapseLCPD">
+                      <div class="card card-body">
+                        <ul class="list-unstyled">
+                          <li class="list-group-item"><b>Member</b> <i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsLcpd0" data-placeholder="class"></i></li>
+                          <li class="list-group-item"><b>High Command</b><i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsLcpd1" data-placeholder="class"></i></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <a data-toggle="collapse" href="#collapseIA" class="w-100" aria-expanded="false"><b>Internal Affairs Division</b> <i class="float-right fas placeholder" data-placeholderkey="permissionsIa0" data-placeholder="class" style="font-size: 25px;"></i></a>
+                    <div class="collapse" id="collapseIA">
+                      <div class="card card-body">
+                        <ul class="list-unstyled">
+                          <li class="list-group-item"><b>Investigator</b> <i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsIa0" data-placeholder="class"></i></li>
+                          <li class="list-group-item"><b>Supervisor</b><i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsIa1" data-placeholder="class"></i></li>
+                          <li class="list-group-item"><b>Commanding Officer</b><i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsIa2" data-placeholder="class"></i></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <a data-toggle="collapse" href="#collapseSIS" class="w-100" aria-expanded="false"><b>Special Investigations Section</b> <i class="float-right fas placeholder" data-placeholderkey="permissionsSis0" data-placeholder="class" style="font-size: 25px;"></i></a>
+                    <div class="collapse" id="collapseSIS">
+                      <div class="card card-body">
+                        <ul class="list-unstyled">
+                          <li class="list-group-item"><b>Detective</b> <i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsSis0" data-placeholder="class"></i></li>
+                          <li class="list-group-item"><b>Squad Leader</b><i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsSis1" data-placeholder="class"></i></li>
+                          <li class="list-group-item"><b>Unit Supervisor</b><i class="float-right fas placeholder" style="font-size: 25px;" data-placeholderkey="permissionsSis2" data-placeholder="class"></i></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+
+                <a href="#" class="btn btn-danger btn-block" onclick="localStorage.removeItem('authCode');window.location.href = 'reauth.html'"><b><i class="fas fa-door-open mr-2"></i>Sign out</b></a>
               </div>
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
           </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
+          <!-- /.col -->
+          <div class="col-md-9">
             <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Responsive Hover Table</h3>
-
-                <div class="card-tools">
-                  <div class="input-group input-group-sm" style="width: 150px;">
-                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
-
-                    <div class="input-group-append">
-                      <button type="submit" class="btn btn-default">
-                        <i class="fas fa-search"></i>
-                      </button>
+              <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                  <li class="nav-item"><a class="nav-link active" href="#notifications-dashboard" data-toggle="tab">Notifications</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#forms" data-toggle="tab">Forms</a></li>
+                </ul>
+              </div><!-- /.card-header -->
+              <div class="card-body">
+                <div class="tab-content">
+                  <div class="active tab-pane" id="notifications-dashboard">
+                    <!-- Post -->
+                    <div class="text-center">
+                      <!-- /.user-block -->
+                      <p>
+                        No new notifications.
+                      </p>
+                    </div>
+                    <!-- /.post -->
+                  </div>
+                  <div class="tab-pane" id="forms">
+                    <ul class="nav flex-column nav-tabs" id="custom-content-below-tab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link" id="select-form-criminal-tipline-tab" data-toggle="pill" href="#select-form-criminal-tipline" role="tab" aria-controls="select-form-criminal-tipline" aria-selected="false">Criminal Activity Tipline</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="select-form-ia-complaint-tab" data-toggle="pill" href="#select-form-ia-complaint" role="tab" aria-controls="select-form-ia-complaint" aria-selected="false">IA Complaint</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="select-form-ia-dtu-tab" data-toggle="pill" href="#select-form-ia-dtu" role="tab" aria-controls="select-form-ia-dtu" aria-selected="false">IA Duty to Update</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="select-form-appeal-tab" data-toggle="pill" href="#select-form-appeal" role="tab" aria-controls="select-form-appeal" aria-selected="false">Disciplinary Action Appeal</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="select-form-foia-tab" data-toggle="pill" href="#select-form-foia" role="tab" aria-controls="select-form-foia" aria-selected="false">Freedom of Information Access Request</a>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="select-form-tabContent">
+                      <div class="tab-pane fade" id="select-form-criminal-tipline" role="tabpanel" aria-labelledby="select-form-criminal-tipline-tab">
+                        <br>This is the official Criminal Activity Tipline of the City of Lander Police Department. You may use this form to report any criminal activity that has occurred within the jurisdiction of the City of Lander. All reports submitted through this system will be reviewed by the Special Investigations Section and may be used to initiate or support ongoing investigations.<br><br>All information provided through this tipline is considered an official report to a law enforcement agency. Submissions are legally recognized as official police reports under 1 M.S.C. § 1202. Knowingly submitting false or misleading information, making fraudulent reports, or using this form for any improper purpose may result in criminal prosecution.<br><br>The Special Investigations Section is responsible for handling complex and high-priority cases within the City of Lander. This elite investigative body is composed of the Intelligence & Investigations Unit and the Street Crimes Unit, both of which specialize in identifying, disrupting, and dismantling criminal enterprises that pose a threat to public safety and governmental integrity.<br><br>The Section conducts in-depth investigations into:
+                        <ul>
+                          <li>Firearm-related crimes, including illegal gun trafficking, shootings, and violent offenses involving firearms.</li>
+                          <li>Government corruption and misconduct, ensuring accountability and ethical conduct among public officials and employees.</li>
+                          <li>White-collar crimes, such as fraud, embezzlement, financial schemes, and other complex financial offenses.</li>
+                          <li>Organized crime, including drug trafficking, money laundering, racketeering, and syndicate-related offenses.</li>
+                          <li>General street crimes, such as violent assaults, high-profile robberies, and gang-related activities.</li>
+                        </ul>
+                        As one of the most effective investigative sections in the state, the Special Investigations Section is committed to delivering justice through intelligence-driven strategies, advanced forensic analysis, and collaborative efforts with state and federal agencies. The Service remains dedicated to maintaining law and order by proactively addressing criminal activity and holding offenders accountable.<br><br>If you have information regarding criminal activity, please provide as much detail as possible, including names, locations, dates, and any supporting evidence. Your cooperation plays a vital role in helping us keep our city safe.<br><br><b>See something? Say something.</b><br><br>
+                        <form class="form-horizontal">
+                          <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                            <div class="col-sm-10">
+                              <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="select-form-ia-complaint" role="tabpanel" aria-labelledby="select-form-ia-complaint-tab">
+                        <br>This is the official Complaint Form of the City of Lander Police Department. Members of the public may use this document to submit a formal report regarding any misconduct, unprofessional behavior, or violation of departmental policies by a Lander Police Officer or any other employee of the Service. Complaints may include, but are not limited to, instances of abuse of authority, excessive use of force, neglect of duty, or any actions that violate the Comprehensive Code of Ethical Conduct, Professional Standards, and Officer Responsibilities for Integrity, Accountability, and Community Trust.<br><br>The Internal Affairs Division is tasked with ensuring accountability, transparency, and discipline within the Service. The Section is responsible for receiving, reviewing, and thoroughly investigating all complaints or allegations brought against Service personnel. These investigations extend to any violations of departmental policies, standing orders, or the statutory laws outlined in the Mayflower State Code. The objective of this process is to uphold the highest levels of professionalism, integrity, and public trust in the Service.<br><br>The City of Lander Police Department remains committed to maintaining a culture of accountability and ethical conduct among its ranks. The Service values input from the community and encourages individuals to report any concerns they may have. Every complaint will be reviewed impartially and addressed in accordance with departmental procedures and applicable laws.<br><br>If you wish to submit a complaint, please ensure that you provide detailed information regarding the incident, including the date, time, and usernames of the officers involved, a description of the misconduct, and any supporting evidence or witness statements. Your cooperation in providing accurate and thorough information will assist in conducting a comprehensive investigation.<br><br>The City of Lander Police Department appreciates your diligence in helping to maintain the highest standards of integrity and accountability within our agency. If you have any questions regarding the complaint process, you may contact the Internal Affairs Division for further guidance.<br><br>
+                        <form class="form-horizontal">
+                          <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                            <div class="col-sm-10">
+                              <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="select-form-ia-dtu" role="tabpanel" aria-labelledby="select-form-ia-dtu-tab">
+                        <br>This form is used to fulfill your duty to update established under section 102-03F of the Department Patrol Guide, noted under § 2.08 of the Department Code of Conduct. Submitting false information may result in disciplinary action.<br><br>
+                        <form class="form-horizontal">
+                          <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                            <div class="col-sm-10">
+                              <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="select-form-appeal" role="tabpanel" aria-labelledby="select-form-appeal-tab">
+                        <br>This is the official Disciplinary Action Appeal Form of the City of Lander Police Department. Current and former officers of the Service have the right to formally challenge any disciplinary action imposed upon them by submitting this appeal. The purpose of this process is to ensure that all disciplinary measures taken against Service personnel are just, fair, and based on factual evidence.<br><br>Any officer, whether actively serving or previously employed by the Service, may file an appeal if they believe that the disciplinary action issued against them was unwarranted, excessive, or improperly administered. Appeals will be reviewed by the Board of Appeals, an independent body within the Service responsible for overseeing and evaluating all disciplinary appeals. The Board will conduct a thorough examination of the circumstances surrounding the disciplinary action, carefully assessing all relevant evidence and statements provided in this form.<br><br>Following its review, the Board of Appeals will reach a decision through a majority vote among its members. The Board may choose to uphold the disciplinary action, modify it, or vacate it entirely. As part of this process, appellants may be contacted for further questioning or requested to provide additional clarifications regarding their appeal. It is imperative that all information submitted is accurate and complete, as misleading or false statements may lead to an automatic denial of the appeal.<br><br>
+                        <b>Submission Guidelines and Restrictions:</b>
+                        <ul>
+                            <li>Appeals may only be filled out after three (3) weeks from the date the disciplinary action was issued.</li>
+                            <li>Verbal Admonishments, Modified Assignments, Mandatory Retrainings or Forced Zero-Tolerance Periods may not be appealed.</li>
+                            <li>Appeals must be submitted within two (2) weeks from when the aforementioned three (3) weeks ends.</li>
+                            <li>Appeals related to dishonorable discharges or blacklists may still be considered after this period—maximum period of two (2) months—, but no other disciplinary matters will be eligible for appeal beyond the two-week deadline.</li>
+                            <li>Officers are strictly prohibited from contacting any Board of Appeals member to inquire about the status of their appeal within seven (7) days of submission. Any such attempt will result in immediate denial of the appeal.</li>
+                            <li>Once an appeal has been denied, no further appeals may be submitted regarding the same disciplinary action. Appeal decisions are final. Any attempt to resubmit or circumvent this rule will result in an immediate denial.</li>
+                        </ul>Once your appeal has been reviewed, you will receive official notification regarding its acceptance or denial. If your appeal is approved for review, you will be informed of any additional steps required in the process.<br><br>All officers are encouraged to submit well-documented and factual appeals to facilitate a fair and efficient review process.<br><br>
+                        <form class="form-horizontal">
+                          <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                            <div class="col-sm-10">
+                              <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="select-form-foia" role="tabpanel" aria-labelledby="select-form-foia-tab">
+                        <br>The City of Lander Police Department has designated this portal as the official form for filing <i>Freedom of Information</i> requests, pursuant to <b>4 M.S.C. 2 § 5305</b>.<br><br>When filing a request, ensure that your request is as specific and accurate as possible. This will help our FOIA Officers better understand your request, ensuring that the requesting party gets exactly what they need.<br><br>Upon submitting a FOIA request, the Service's FOIA Office will process your request. This stage may take a couple of days to process, and shall be processed in <u>no more than four (4) working days</u>. Processing extensions may be required for certain requests, in which the requesting party shall be informed of if need be.<br><br><u><i>Ensure that your Direct Messages settings are set to <b>"Allow"</b> upon submission so that our Office can follow-up on your request.</i></u><br><br>By submitting this request form you acknowledge that <i>Freedom of Information Access</i> requests may be denied for any reason deemed fit by the City of Lander Police Department <i>Freedom of Information Access</i> Office, pursuant to relevant legislation.<br><br>Designed in accordance with <i><b>Title 4, Chapter V. Government Transparency, Subsection III</b></i>.<br><br>
+                        <form class="form-horizontal">
+                          <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                              <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                            <div class="col-sm-10">
+                              <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <div class="offset-sm-2 col-sm-10">
+                              <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                   </div>
+                  <!-- /.tab-pane -->
                 </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>User</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Reason</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>183</td>
-                      <td>John Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-success">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>219</td>
-                      <td>Alexander Pierce</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-warning">Pending</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>657</td>
-                      <td>Bob Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-primary">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>175</td>
-                      <td>Mike Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-danger">Denied</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <!-- /.tab-content -->
               </div>
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
           </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Responsive Hover Table</h3>
-
-                <div class="card-tools">
-                  <div class="input-group input-group-sm" style="width: 150px;">
-                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
-
-                    <div class="input-group-append">
-                      <button type="submit" class="btn btn-default">
-                        <i class="fas fa-search"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>User</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Reason</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>183</td>
-                      <td>John Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-success">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>219</td>
-                      <td>Alexander Pierce</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-warning">Pending</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>657</td>
-                      <td>Bob Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-primary">Approved</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                    <tr>
-                      <td>175</td>
-                      <td>Mike Doe</td>
-                      <td>11-7-2014</td>
-                      <td><span class="tag tag-danger">Denied</span></td>
-                      <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="card-footer">
-                test
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
+          <!-- /.col -->
         </div>
         <!-- /.row -->
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  Summernote
-                </h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <div id="summernote" style="display: none;">Place <em>some</em> <u>text</u> <strong>here</strong></div>
-              </div>
-            </div>
-          </div>
-          <!-- /.col-->
-        </div>
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
@@ -522,8 +591,14 @@ function linkify(text) {
   <aside class="control-sidebar control-sidebar-dark">
     <!-- Control sidebar content goes here -->
     <div class="p-3">
-      <h5>Title</h5>
-      <p>Sidebar content</p>
+      <h5>Project Information</h5>
+      Maintained by Vasek_Stolba for the <u><a href="https://www.roblox.com/communities/33620427">Lander City Police Department</a></u>.
+      <br><br>Important documents:
+      <ul>
+        <li><u><a href="terms-of-service.html">Terms of Service</a></u></li>
+        <li><u><a href="privacy-policy.html">Privacy Policy</a></u></li>
+      </ul>
+
     </div>
   </aside>
   <!-- /.control-sidebar -->
@@ -532,10 +607,10 @@ function linkify(text) {
   <footer class="main-footer">
     <!-- To the right -->
     <div class="float-right d-none d-sm-inline">
-      Anything you want
+      <strong>Copyright &copy; 2025</strong> <i>Anonymous Author.</i> All rights reserved.
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    Intended for use by the <a href="https://www.roblox.com/communities/33620427">Lander City Police Department</a>.
   </footer>
 </div>
 <!-- ./wrapper -->
@@ -550,6 +625,12 @@ function linkify(text) {
 <script src="dist/js/adminlte.min.js"></script>
 <!-- Summernote -->
 <script src="plugins/summernote/summernote-bs4.min.js"></script>
+<!-- DOMPurify -->
+<script src='plugins/DOMPurify/purify.min.js'></script>
+<!-- pace-progress -->
+<script src='plugins/nprogress/nprogress.js'></script>
+<!-- main -->
+<script src="plugins/defaultScripts/scripts.js"></script>
 <script>
   $(function () {
     // Summernote
