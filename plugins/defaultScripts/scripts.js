@@ -105,15 +105,19 @@ function collectRequiredValues(root) {
   const values = new Set();
 
   values.add("notifications"); // always fetch notifications
+  values.add("permissions");
   
   // find data-repeat blocks → add only their key
   root.querySelectorAll("[data-repeat]").forEach(el => {
     values.add(el.dataset.repeat);
   });
 
-  root.querySelectorAll("[data-placeholderkey]").forEach(el => {
-    const key = el.dataset.placeholderkey;
-    if (key) values.add(key.split(".")[0]); // top-level keys only
+  root.querySelectorAll("[data-placeholder]").forEach(el => {
+    const placeholderDetails = el.dataset.placeholder;
+    placeholderDetails.split("*").forEach(placeholder => {
+      let key = placeholder.split(";")[1]
+      if (key) values.add(key.split(".")[0]); // top-level keys only
+    })
   });
 
   // find all [placeholder] patterns in text/html
@@ -124,9 +128,9 @@ function collectRequiredValues(root) {
 }
 
 async function primary() {
-  NProgress.start();
+  try {NProgress.start();} catch (err) {}
   
-  if (!accountId) {
+  if (!accountId && location.pathname != '/login.html') {
     location.href = "login.html";
     return;
   }
@@ -145,7 +149,10 @@ async function primary() {
   const response = await processCommand("preauth", JSON.stringify(requiredValues));
 
   if (response.error) {
-    location.href = username ? "reauth.html" : "login.html";
+    let newLocHref = username ? "reauth.html" : "login.html";
+    if ('/' + newLocHref != location.pathname) {
+      location.href = newLocHref
+    }
     return;
   }
 
@@ -160,7 +167,7 @@ async function primary() {
   applyAttributePlaceholders(document.body, data);
   navBarAccess();
   notificationHandler();
-  NProgress.done();
+  try {NProgress.done();} catch (err) {}
 }
 
 // 🔧 Template rendering engine
@@ -238,24 +245,30 @@ function resolvePath(obj, path) {
 
 function applyAttributePlaceholders(root, data) {
   root.querySelectorAll("[data-placeholder]").forEach(el => {
-    const attr = el.dataset.placeholder;       // e.g., "src", "class", "title"
-    const key = el.dataset.placeholderkey;     // e.g., "userHeadshot" or "userCardClasses"
-    const val = resolvePath(data, key);
+    const placeholderDetails = el.dataset.placeholder.split("*");
 
-    if (val == null) return;
+    if (!placeholderDetails) return;
 
-    // Special handling for class lists
-    if (attr === "class") {
-      // Option A: replace all classes except the static ones
-      el.classList.add(...(Array.isArray(val) ? val : [val]));
-      
-      /*const staticClasses = el.dataset.staticclasses?.split(/\s+/).filter(Boolean) || [];
-      el.className = [...staticClasses, ...(Array.isArray(val) ? val : [val])].join(" ");*/
-    }
-    // Normal attributes (src, href, title, etc.)
-    else {
-      el.setAttribute(attr, val);
-    }
+    placeholderDetails.forEach(placeholder => {
+      const attr = placeholder.split(";")[0]
+      const key = placeholder.split(";")[1]
+      if (!key) return;
+      const val = resolvePath(data, key)
+
+      if (val == null) return;
+
+      if (attr === "class") {
+        // Option A: replace all classes except the static ones
+        el.classList.add(...(Array.isArray(val) ? val : [val]));
+        
+        /*const staticClasses = el.dataset.staticclasses?.split(/\s+/).filter(Boolean) || [];
+        el.className = [...staticClasses, ...(Array.isArray(val) ? val : [val])].join(" ");*/
+      }
+      // Normal attributes (src, href, title, etc.)
+      else {
+        el.setAttribute(attr, val);
+      }
+    })
   });
 }
 
@@ -487,13 +500,13 @@ function loadingState(element, state) {
 
 function navBarAccess() {
   try {
-    if (JSON.parse(localStorage.getItem('returnedData')).permissionsIa0.includes("text-success")) {
+    if (JSON.parse(localStorage.getItem('returnedData')).permissions.ia0.check) {
       document.getElementById("iaNav").style.display = ""
     }
-    if (JSON.parse(localStorage.getItem('returnedData')).permissionsSis0.includes("text-success")) {
+    if (JSON.parse(localStorage.getItem('returnedData')).permissions.sis0.check) {
       document.getElementById("sisNav").style.display = ""
     }
-    if (JSON.parse(localStorage.getItem('returnedData')).permissionsLcpd1.includes("text-success")) {
+    if (JSON.parse(localStorage.getItem('returnedData')).permissions.lcpd1.check) {
       document.getElementById("sisNav").style.display = ""
       document.getElementById("iaNav").style.display = ""
     }
