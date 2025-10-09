@@ -659,7 +659,7 @@ function openAuth(nonce) {
     newWindow.focus();
     window.addEventListener('message', function(event) {
       if (event.origin !== window.location.origin) return;
-      console.log(event.origin)
+      console.log(event)
 
       console.log('OAuth complete:', event.data);
       newWindow.close();
