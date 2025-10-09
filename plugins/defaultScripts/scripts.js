@@ -266,6 +266,7 @@ async function formHandler(event) {
   const form = event.target;
   const submitBtn = form.querySelector("button[type='submit']");
   submitBtn.disabled = true;
+  loadingState(form, true)
 
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
@@ -280,6 +281,7 @@ async function formHandler(event) {
   if (!formName) {
     console.error("Form missing data-form-name attribute.");
     submitBtn.disabled = false;
+    loadingState(form, false)
     return;
   }
 
@@ -308,6 +310,7 @@ async function formHandler(event) {
     alert("An unexpected error occurred. See console for details.");
   } finally {
     submitBtn.disabled = false;
+    loadingState(form, false)
   }
 }
 
@@ -421,21 +424,19 @@ function sanitize(text) {
 
 async function processCommand(command, args) {
   try {
-      console.log(command)
-      console.log(args)
-      const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-              authCode: authCode,
-              accountId: accountId,
-              command: {
-                commandName: command,
-                args: args
-              }
-          })
-      });
-      const data = await res.json()
-      return data
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        authCode: authCode,
+        accountId: accountId,
+        command: {
+          commandName: command,
+          args: args
+        }
+      })
+    });
+    const data = await res.json()
+    return data
   } catch (err) {
     console.log(err)
     return {
@@ -454,6 +455,34 @@ function linkify(text) {
         }
         return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     });
+}
+
+function loadingState(element, state) {
+  let cardElement
+  
+  while (element && element !== document) {
+    if (element.classList && element.classList.contains('card')) {
+      cardElement = element;
+      break
+    }
+    element = element.parentNode;
+  }
+
+  if (element == document) {
+    console.log("No parent with class 'card' found")
+    return null
+  }
+
+  if (state) {
+    let loadingDiv = document.createElement("div")
+    loadingDiv.innerHTML = `<i class="fas fa-2x fa-sync-alt fa-spin"></i>`
+    loadingDiv.className = "overlay dark"
+    cardElement.appendChild(loadingDiv)
+  } else {
+    let loadingDiv = cardElement.querySelector(".overlay.dark")
+    cardElement.removeChild(loadingDiv)
+  }
+  return null; // No parent with class 'card' found
 }
 
 function navBarAccess() {
@@ -498,14 +527,14 @@ function notificationHandler(notifId) {
           unreadNotifs[key] = notifs[key]
         }
       })
-      console.log(notifs)
 
       if (Object.keys(unreadNotifs).length > 0) {
         document.getElementById("notif-dropdown-list").textContent = ""
-        document.getElementById("notifications-dashboard").textContent = ""
+        if (document.getElementById("notifications-dashboard")) {
+          document.getElementById("notifications-dashboard").textContent = ""
+        }
       }
       Object.keys(unreadNotifs).forEach(key => {
-        console.log(key)
         let notif = unreadNotifs[key]
         let notifElement = document.createElement("a")
         notifElement.classList.add("dropdown-item")

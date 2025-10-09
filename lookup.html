@@ -20,7 +20,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- pace-progress -->
   <link rel='stylesheet' href='plugins/nprogress/nprogress.css'/>
 </head>
-<body class="hold-transition sidebar-mini" onload="primary()">
+<body class="hold-transition sidebar-mini">
 <div class="wrapper">
 
   <!-- Navbar -->
@@ -128,7 +128,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="index.html" class="nav-link active">
               <i class="fas fa-house-user nav-icon"></i>
               <p>Dashboard</p>
             </a>
@@ -210,134 +210,137 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <div class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-8 offset-md-2">
-            <br><br><br>
-            <form onsubmit="formHandler(event)" data-form-name="lookup" data-form-template="formLookupResponse">
-              <div class="input-group">
-                <input type="search" name="inquiry" class="form-control form-control-lg" placeholder="smellychickennuggies">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-lg btn-default">
-                    <i class="fa fa-search"></i>
-                  </button>
-                </div>
+          <div class="col-md-10 offset-md-1">
+            <div class="card card-default">
+              <div class="card-body">
+                <form onsubmit="formHandler(event)" data-form-name="lookup" data-form-template="formLookupResponse">
+                  <div class="input-group">
+                    <input type="search" name="inquiry" class="form-control form-control-lg" placeholder="smellychickennuggies">
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-lg btn-default">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <template data-template-for="lookup">
+                  <div class="row mt-4">
+                    <div class="col-md-4">
+
+                      <!-- Profile Image -->
+                      <div class="card card-primary card-outline">
+                        <div class="card-body box-profile">
+                          <div class="text-center">
+                            <img class="profile-user-img img-fluid img-circle" src="{{userHeadshot}}" alt="User profile picture">
+                          </div>
+
+                          <h3 class="profile-username text-center">{{username}}</h3>
+
+                          <p class="text-muted text-center">ID: {{userId}}</p>
+
+                          <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                              <span class="w-100" aria-expanded="false"><b>Resident:</b> <i class="float-right fas {{residentIcon}}" style="font-size: 25px;"></i></span>
+                            </li>
+                          </ul>
+                        </div>
+                        <!-- /.card-body -->
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-8">
+                      <div class="card">
+                        <div class="card-header p-2">
+                          <ul class="nav nav-pills">
+                            <li class="nav-item"><a class="nav-link active" href="#lookup-state-result" data-toggle="tab">State</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#lookup-crime-result" data-toggle="tab">Criminal</a></li>
+                          </ul>
+                        </div><!-- /.card-header -->
+                        <div class="card-body">
+                          <div class="tab-content">
+                            <div class="active tab-pane" id="lookup-state-result">
+                              <div>
+                                <div class="card-body p-0">
+                                  <table class="table table-sm">
+                                    <thead>
+                                      <tr>
+                                        <th>State Status & Licenses</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr data-repeat="stateStatus">
+                                        <td>{{value}}</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <br>
+                                <div class="card-body p-0">
+                                  <table class="table table-sm">
+                                    <thead>
+                                      <tr>
+                                        <th>State Affiliations</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr data-repeat="stateAffiliations">
+                                        <td>{{value}}</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="tab-pane" id="lookup-crime-result">
+                              <div>
+                                <div class="card-body p-0">
+                                  <table class="table table-sm">
+                                    <thead>
+                                      <tr>
+                                        <th>Records</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td><i>This feature is currently unavailable.</i></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <br>
+                                <div class="card-body p-0">
+                                  <table class="table table-sm">
+                                    <thead>
+                                      <tr>
+                                        <th>Criminal Affiliations</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr data-repeat="criminalAffiliations">
+                                        <td>{{value}}</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- /.tab-pane -->
+                          </div>
+                          <!-- /.tab-content -->
+                        </div>
+                        <!-- /.card-body -->
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </template>
               </div>
-            </form>
+            </div>
           </div>
         </div>
-        <template data-template-for="lookup">
-          <div class="row mt-4">
-            <div class="col-md-4">
-
-              <!-- Profile Image -->
-              <div class="card card-primary card-outline">
-                <div class="card-body box-profile">
-                  <div class="text-center">
-                    <img class="profile-user-img img-fluid img-circle" src="{{userHeadshot}}" alt="User profile picture">
-                  </div>
-
-                  <h3 class="profile-username text-center">{{username}}</h3>
-
-                  <p class="text-muted text-center">ID: {{userId}}</p>
-
-                  <ul class="list-group list-group-unbordered mb-3">
-                    <li class="list-group-item">
-                      <span class="w-100" aria-expanded="false"><b>Resident:</b> <i class="float-right fas {{residentIcon}}" style="font-size: 25px;"></i></span>
-                    </li>
-                  </ul>
-                </div>
-                <!-- /.card-body -->
-              </div>
-              <!-- /.card -->
-            </div>
-            <!-- /.col -->
-            <div class="col-md-8">
-              <div class="card">
-                <div class="card-header p-2">
-                  <ul class="nav nav-pills">
-                    <li class="nav-item"><a class="nav-link active" href="#lookup-state-result" data-toggle="tab">State</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#lookup-crime-result" data-toggle="tab">Criminal</a></li>
-                  </ul>
-                </div><!-- /.card-header -->
-                <div class="card-body">
-                  <div class="tab-content">
-                    <div class="active tab-pane" id="lookup-state-result">
-                      <div>
-                        <div class="card-body p-0">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>State Status & Licenses</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr data-repeat="stateStatus">
-                                <td>{{value}}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <br>
-                        <div class="card-body p-0">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>State Affiliations</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr data-repeat="stateAffiliations">
-                                <td>{{value}}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="tab-pane" id="lookup-crime-result">
-                      <div>
-                        <div class="card-body p-0">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>Records</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td><i>This feature is currently unavailable.</i></td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <br>
-                        <div class="card-body p-0">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>Criminal Affiliations</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr data-repeat="criminalAffiliations">
-                                <td>{{value}}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- /.tab-pane -->
-                  </div>
-                  <!-- /.tab-content -->
-                </div>
-                <!-- /.card-body -->
-              </div>
-              <!-- /.card -->
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-        </template>
       </div>
     </div>
     <!-- /.content -->
