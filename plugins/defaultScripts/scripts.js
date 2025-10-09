@@ -137,7 +137,6 @@ async function primary() {
   // Step 2. Fetch updated data
 
   const requiredValues = collectRequiredValues(document.body);
-  const storedDocumentBody = document.body.cloneNode(true);
   renderTemplate(document.body, data);
   applyAttributePlaceholders(document.body, data);
   navBarAccess();
@@ -157,7 +156,7 @@ async function primary() {
   console.log(data)
   localStorage.setItem("returnedData", JSON.stringify(data));
 
-  renderTemplate(document.body, data, storedDocumentBody);
+  renderTemplate(document.body, data);
   applyAttributePlaceholders(document.body, data);
   navBarAccess();
   notificationHandler();
@@ -166,19 +165,18 @@ async function primary() {
 
 // 🔧 Template rendering engine
 function renderTemplate(root, data) {
-  // Handle repeat blocks 
+  // Handle repeat blocks
   root.querySelectorAll("[data-repeat]").forEach(container => {
+    if (!container.__templateHTML) {
+      container.__templateHTML = container.innerHTML.trim();
+    }
+    
     const key = container.dataset.repeat;
     const arr = data[key];
     if (!Array.isArray(arr)) return;
 
-    console.log(arr)
-
-    const templateHTML = container.innerHTML.trim();
-    console.log(templateHTML)
+    const templateHTML = container.__templateHTML;
     const existingChildren = Array.from(container.children);
-
-    console.log(existingChildren)
 
     // Reuse existing elements if possible
     arr.forEach((item, index) => {
@@ -188,25 +186,15 @@ function renderTemplate(root, data) {
       tempDiv.innerHTML = html;
       const newNode = tempDiv.firstElementChild;
 
-      console.log(newNode)
       if (!newNode) return;
-      
+
       if (existingChildren[index]) {
         // Only replace if content has changed
         if (!existingChildren[index].isEqualNode(newNode)) {
           container.replaceChild(newNode, existingChildren[index]);
         }
       } else {
-        newNode.dataset["repeatItemIdentifier"] = `${key}:${item.value}:${index}`
-        let existingNode = container.parentNode.querySelector(`[data-repeat-item-identifier="${key}:${item.value}:${index}"`)
-        console.log(newNode)
-        console.log(existingNode)
-        if (existingNode) {
-          container.parentNode.replaceChild(newNode, existingNode)
-        } else {
-          container.parentNode.appendChild(newNode);
-        }
-        
+        container.appendChild(newNode);
       }
     });
 
@@ -224,7 +212,11 @@ function replaceInlinePlaceholders(root, data) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let node;
   while (node = walker.nextNode()) {
-    const newText = replacePlaceholders(node.textContent, data);
+    if (!node.__templateText) {
+      node.__templateText = node.textContent;
+    }
+    
+    const newText = replacePlaceholders(node.__templateText, data);
     if (newText !== node.textContent) {
       node.textContent = newText;
     }
@@ -506,8 +498,14 @@ function notificationHandler(notifId) {
           unreadNotifs[key] = notifs[key]
         }
       })
+      console.log(notifs)
 
+      if (Object.keys(unreadNotifs).length > 0) {
+        document.getElementById("notif-dropdown-list").textContent = ""
+        document.getElementById("notifications-dashboard").textContent = ""
+      }
       Object.keys(unreadNotifs).forEach(key => {
+        console.log(key)
         let notif = unreadNotifs[key]
         let notifElement = document.createElement("a")
         notifElement.classList.add("dropdown-item")
@@ -528,7 +526,7 @@ function notificationHandler(notifId) {
           <!-- Message End -->`
 
         //notifElement.onclick = () => {notificationHandler(key);notifElement.remove()}
-        document.getElementById("notif-dropdown-list").textContent = ""
+        
         document.getElementById("notif-dropdown-list").appendChild(notifElement)
         let divider = document.createElement("div")
         divider.classList.add("dropdown-divider")
@@ -552,7 +550,6 @@ function notificationHandler(notifId) {
               <p>
                 ${(notif.message.length > 135) ? (notif.message.substring(0, 134)) + "..." : (notif.message)}
               </p>`
-          document.getElementById("notifications-dashboard").textContent = ""
           document.getElementById("notifications-dashboard").appendChild(notifElement)
         }
       })
@@ -694,5 +691,5 @@ function openAuth(nonce) {
         }
         document.getElementById("signinbtn").disabled = false
     }
-    document.getElementById("signinbtn").disabled = true
+    document.getElementById("signinbtn").disabled = false
 }
